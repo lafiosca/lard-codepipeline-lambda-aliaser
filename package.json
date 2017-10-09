@@ -1,0 +1,31 @@
+{
+  "name": "lard-codepipeline-lambda-aliaser",
+  "version": "1.0.0",
+  "description": "CodePipeline custom action to alias Lambda function versions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/lafiosca/lard-codepipeline-lambda-aliaser.git"
+  },
+  "keywords": [
+    "lard",
+    "aws",
+    "lambda",
+    "codepipeline"
+  ],
+  "author": {
+    "name": "Joe Lafiosca",
+    "email": "joe@lafiosca.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "lard-codepipeline-custom-action": "^1.0.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.130.0"
+  }
+}
