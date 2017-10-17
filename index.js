@@ -1,59 +1,57 @@
 'use strict';
 
 const Promise = require('bluebird');
-const logger = require('lard-logger');
-const codePipelineCustomAction = require('lard-codepipeline-custom-action');
-const createJobValidator = codePipelineCustomAction.createJobValidator;
-const createAction = codePipelineCustomAction.createAction;
-
 const AWS = require('aws-sdk');
+const _ = require('lodash');
+const { createJobValidator, createAction } = require('lard-codepipeline-custom-action');
+
 AWS.config.setPromisesDependency(Promise);
 
 const lambda = new AWS.Lambda();
 
-const jobValidator = createJobValidator(1, 0, job => {
-	if (!job.data || !job.data.actionConfiguration || !job.data.actionConfiguration.configuration || !job.data.actionConfiguration.configuration.UserParameters) {
+const jobValidator = createJobValidator(1, 0, (job) => {
+	job.aliasName = _.get(job, 'data.actionConfiguration.configuration.UserParameters');
+
+	if (!job.aliasName) {
 		throw new Error('Alias name must be specified via CodePipeline custom action user parameters');
 	}
-
-	job.aliasName = job.data.actionConfiguration.configuration.UserParameters;
 
 	return job;
 });
 
 const inputHandler = (job, input) => {
-	logger.log('Received input:\n' + JSON.stringify(input, null, 2));
+	console.log(`Received input:\n${JSON.stringify(input, null, 2)}`);
 
-	const updates = input.map(version => {
+	const updates = input.map((version) => {
 		const params = {
 			FunctionName: version.FunctionName,
 			Name: job.aliasName,
 			FunctionVersion: version.Version,
 		};
 
-		logger.log('Updating alias:\n' + JSON.stringify(params, null, 2));
+		console.log(`Updating alias:\n${JSON.stringify(params, null, 2)}`);
 
 		return lambda.updateAlias(params)
 			.promise()
-			.then(data => {
-				logger.log(`Updated alias ${data.AliasArn}`);
+			.then((data) => {
+				console.log(`Updated alias ${data.AliasArn}`);
 			})
-			.catch(error => {
+			.catch((error) => {
 				if (error.code !== 'ResourceNotFoundException') {
-					logger.error(`Failed to update ${params.Name} alias for ${params.FunctionName}: ${error}`);
+					console.error(`Failed to update ${params.Name} alias for ${params.FunctionName}: ${error}`);
 					throw error;
 				}
 
-				logger.log(`The ${params.Name} alias for ${params.FunctionName} does not exist; creating`);
+				console.log(`The ${params.Name} alias for ${params.FunctionName} does not exist; creating`);
 
 				return lambda.createAlias(params)
 					.promise()
-					.then(data => {
-						logger.log(`Created alias ${data.AliasArn}`);
+					.then((data) => {
+						console.log(`Created alias ${data.AliasArn}`);
 					})
-					.catch(error => {
-						logger.error(`Failed to create ${params.Name} alias for ${params.FunctionName}: ${error}`);
-						throw error;
+					.catch((secondError) => {
+						console.error(`Failed to create ${params.Name} alias for ${params.FunctionName}: ${secondError}`);
+						throw secondError;
 					});
 			});
 	});

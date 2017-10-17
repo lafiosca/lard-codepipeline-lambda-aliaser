@@ -22,10 +22,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.134.0",
     "bluebird": "^3.5.1",
-    "lard-codepipeline-custom-action": "^1.0.0"
-  },
-  "devDependencies": {
-    "aws-sdk": "^2.130.0"
+    "lard-codepipeline-custom-action": "^1.0.0",
+    "lodash": "^4.17.4"
   }
 }
